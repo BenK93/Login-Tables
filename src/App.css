@@ -2,15 +2,56 @@
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+
+.MuiTableHead-root{
+  background-color: #a2d2ff;
+}
+.statistics{
+  text-align: center;
+  margin: 50px auto;
+  padding: 50px;
+  background-color:#93c7ff;
+  box-shadow: 3px 3px 5px 6px #ccc;
+  border-radius: 30px;
+}
+/* Mobile CSS */
+@media only screen and (max-width: 500px){
+
+.login-form{
+  padding-left: 100px;
+  width: 100%;
 }
 
+}
+/* //  desktop */
+@media only screen and (min-width: 700px){
+  
+  #root{
+    width:80%;
+    margin: auto;
+  }
+  .statistics{
+    width: 50%;
+}
+  .login-form{
+    font-weight: 700;
+    font-size: 15px;
+    padding: 24px 64px 24px 24px;
+    padding:0 50px;
+    text-align:center;
+    margin: auto;
+  padding-left: 0px;
+    padding-top: 150px;
+    width:40%;
+  }
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
   }
+}
+.login-form{
+  padding-top: 150px;
 }
 
 .App-header {
