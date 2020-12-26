@@ -21,7 +21,7 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
     
     const LoginPage = (props) => {
         const {globalState, globalDispatch} = useContext(Context);
-
+        const [form] = Form.useForm();
         // using RE for validation
         const strongPass = (password) =>{    
             let hasUpperCase = password.match(/[A-Z]+/) ? true : false;
@@ -71,6 +71,7 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
                         <LoadingOutlined style={{ fontSize: '60px', color: '#08c' }}></LoadingOutlined>                           
                          : 
                         <Form
+                            form={form}
                             {...layout}
                             name="login"  
                             onFinish={handleLogin }
@@ -101,10 +102,18 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
                             <Input.Password prefix={<LockTwoTone type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Enter Password"/>
                         </Form.Item>
 
-                        <Form.Item {...tailLayout}>
-                            <Button type="primary" htmlType="submit">
-                            Login
+                        <Form.Item {...tailLayout} shouldUpdate={true}>
+                            {() => (
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                disabled={
+                                !form.isFieldsTouched(false) ||
+                                form.getFieldsError().filter(({ errors }) => errors.length).length
+                                }>
+                                LOGIN
                             </Button>
+                            )}
                         </Form.Item>
                         </Form>
                         }

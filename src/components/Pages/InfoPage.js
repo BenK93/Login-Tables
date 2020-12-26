@@ -44,7 +44,7 @@ export default class InfoPage extends Component {
                 "Content-Type": "application/json",
                 "Token": token,
               } 
-        }
+            }
         )
         const data = await res.json();
         this.setState({ projects: data});
@@ -67,7 +67,6 @@ export default class InfoPage extends Component {
             <div>
                 { !globalState.isLoggedIn ? this.redirectHome() : null}
                 <Divider orientation="right" plain>
-                
                     <Button
                     onClick={() =>globalDispatch({type: "LOGOUT"})}
                     type="primary" 

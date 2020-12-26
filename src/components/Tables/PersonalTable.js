@@ -7,7 +7,6 @@ export default class PersonalTable extends PureComponent {
     render() {
         return (
                 <MaterialTable
-                
                 title="Personal Info"
                 icons ={this.props.Icons}
                 columns={[
