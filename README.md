@@ -1,4 +1,5 @@
-# React LoginPanel & Tables
+# React LoginPanel & Tables with Redux
+
 # Getting Started 
 
 1) Clone repo.
