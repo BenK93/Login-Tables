@@ -1,7 +1,11 @@
-import React, {useContext} from 'react';
-import Context from '../../store/context';
+
+import React from 'react';
+// import Context from '../../store/context';
+import {connect} from 'react-redux';
+import * as actions from '../../store/actions/authAction';
 import { Form, Input, Button } from 'antd';
-import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
+import { LockTwoTone, UserOutlined, LoadingOutlined, LoginOutlined} from '@ant-design/icons';
+// import { isElementOfType } from 'react-dom/test-utils';
 
     const layout = {
     labelCol: {
@@ -19,62 +23,75 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
     };
     
     
-    const LoginPage = (props) => {
-        const {globalState, globalDispatch} = useContext(Context);
-        const [form] = Form.useForm();
+    class LoginPage extends React.Component {
+        
+        // [form] = Form.useForm();
+        state  = {
+            validEmail: false,
+            validPassword: false
+        }
         // using RE for validation
-        const strongPass = (password) =>{    
+        strongPass = (password) =>{    
             let hasUpperCase = password.match(/[A-Z]+/) ? true : false;
             let hasNum = password.match(/[0-9]+/) ? true : false;
             return hasUpperCase && hasNum;
         }
         // validating password
-        const validatePassword = (values,pass) => {
-            if(pass.length < 8 || !strongPass(pass)){
+        validatePassword = (values,pass) => {
+            if(pass.length < 8 || !this.strongPass(pass)){
                 return Promise.reject("Required: at least 8 characters, UpperCase and a Number");
             }else {
+                this.setState({validPassword: true});
                 return Promise.resolve();
             }
         }
-        const redirect = (path)=>{
-            props.history.push(path)
+
+        validateEmail = (values,email) => {
+            let isAnEmail = email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/) ? true : false;
+            if(!isAnEmail){
+                return Promise.reject();
+            }else{
+                this.setState({validEmail: true});
+                return Promise.resolve();
+            }
         }
+        
+        redirect = (path)=>{
+            this.props.history.push(path)
+        }
+
         // handling login making sure password and email are correct
-        const handleLogin = async (values) => {
-            // this.setState({LoggedIn: true})
-            globalDispatch({type: "LOGIN"})
-            const result = await fetch("https://private-052d6-testapi4528.apiary-mock.com/authenticate", {
-                method: 'post',
-                body: JSON.stringify({ username: values.username, password: values.Password }),
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-            const body = await result.json();
-            window.sessionStorage.setItem('token',body[0].token );
-            window.sessionStorage.setItem('name',body[0].personalDetails.name );
-            window.sessionStorage.setItem('team',body[0].personalDetails.Team );
-            window.sessionStorage.setItem('joinedAt',body[0].personalDetails.joinedAt );
-            window.sessionStorage.setItem('avatar',body[0].personalDetails.avatar );
-            setTimeout(redirect('/info'), 2000);
+        handleLogin = async (values) => {
+            this.props.login(values.username, values.password);
+            if(!this.props.error){
+                setTimeout(this.redirect('/info'), 2000);
+            }
         };
 
-       
+        componentWillMount (){
+            let nameExists = window.sessionStorage.getItem('name');
+            if(nameExists && this.props.isLoggedIn){
+                this.props.isAuth()
+                this.redirect('/info')
+            }
+        }
+
+        render(){
+            let showBtn = !(this.state.validEmail && this.state.validPassword)
             return (            
                 <div className="login-form">
                         <h1 className="login-header" style={{fontWeight: "800"}}>
                             Login Page                                   
                         </h1>
                         { 
-                        globalState.isLoggedIn
+                        this.props.loading
                         ?  
-                        <LoadingOutlined style={{ fontSize: '60px', color: '#08c' }}></LoadingOutlined>                           
-                         : 
+                        <LoadingOutlined style={{ fontSize: '60px', color: '#08c' }}></LoadingOutlined>                                                
+                            : 
                         <Form
-                            form={form}
                             {...layout}
                             name="login"  
-                            onFinish={handleLogin }
+                            onFinish={this.handleLogin }
                             >
                         <Form.Item
                             label="Email"
@@ -84,8 +101,9 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
                                 type:"email",
                                 required: true,
                                 message: 'Please Enter a Valid Email!',
-                            },
-                            ] }
+                            },{
+                                validator: this.validateEmail,
+                            }] }
                             hasFeedback>
                             <Input prefix={<UserOutlined type="user" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Enter Email"/>
                         </Form.Item>
@@ -95,9 +113,9 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
                         name="Password"
                         label="Password"                
                         rules={[{
-                            required: true, message: 'Please input your Password!',
+                            required: true
                             },{
-                            validator: validatePassword,
+                            validator: this.validatePassword,
                             }]} hasFeedback>
                             <Input.Password prefix={<LockTwoTone type="lock" style={{ color: 'rgba(0,0,0,.25)' }} />} placeholder="Enter Password"/>
                         </Form.Item>
@@ -107,10 +125,9 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
                             <Button
                                 type="primary"
                                 htmlType="submit"
-                                disabled={
-                                !form.isFieldsTouched(false) ||
-                                form.getFieldsError().filter(({ errors }) => errors.length).length
-                                }>
+                                icon={<LoginOutlined />}
+                                disabled={showBtn}
+                                >
                                 LOGIN
                             </Button>
                             )}
@@ -119,13 +136,23 @@ import { LockTwoTone, UserOutlined, LoadingOutlined } from '@ant-design/icons';
                         }
                 </div>
         )
+        };
     
 }
+    
+const mapStateToProps = (state) => {
+    return{
+        loading: state.loading,
+        error: state.error,
+        isLoggedIn: state.isLoggedIn
+    }
+}
 
+const mapDispatchToProps = (dispatch) =>{
+    return {
+        login: (username, password) => dispatch(actions.login(username, password)),
+        isAuth: () => dispatch(actions.isAuth())
+    }
+}
 
-
-
-
-
-
-export default LoginPage;
+export default connect(mapStateToProps, mapDispatchToProps)(LoginPage)

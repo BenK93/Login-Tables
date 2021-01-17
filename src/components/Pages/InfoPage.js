@@ -1,10 +1,12 @@
 
 import React, { Component } from 'react';
-import Context from '../../store/context';
 import PersonalTable from "../Tables/PersonalTable";
 import ProjectsTable from "../Tables/ProjectsTable";
 import Statistics from "../General/Statistics";
+import * as actions from "../../store/actions/authAction"
+import {connect } from "react-redux";
 import { Button, Divider } from 'antd';
+import {LogoutOutlined} from '@ant-design/icons'
 import {Pages, Search, ChevronLeft,ChevronRight,LastPage,FirstPage,ArrowDownward,ViewColumn,AddBox,Clear, FilterList} from '@material-ui/icons';
 
 const Icons = ({
@@ -21,8 +23,7 @@ const Icons = ({
     Clear :() => <Clear/>,
 })
 
-export default class InfoPage extends Component {
-    static contextType = Context;
+class InfoPage extends Component {
     state = {
         projects: [],
         personalInfo: {
@@ -57,19 +58,23 @@ export default class InfoPage extends Component {
             return { personalInfo}; 
           });
     }
+
     redirectHome = () => {
+        this.props.logout()
         this.props.history.push('/');
     }
 
     render() {        
-        const {globalState, globalDispatch} = this.context;
         return (
-            <div>
-                { !globalState.isLoggedIn ? this.redirectHome() : null}
+            <div>                
                 <Divider orientation="right" plain>
+                    <p className="welcome-user">
+                        Welcome {this.state.personalInfo.name}  
+                    </p>
                     <Button
-                    onClick={() =>globalDispatch({type: "LOGOUT"})}
-                    type="primary" 
+                    onClick={this.redirectHome}
+                    type="primary"
+                    icon={<LogoutOutlined />} 
                     htmlType="submit">
                         Logout
                     </Button>
@@ -90,3 +95,10 @@ export default class InfoPage extends Component {
         )
     }
 }
+
+const mapDispatchToProps = (dispatch) => {
+    return {
+        logout: () => dispatch(actions.logout())
+    }
+}
+export default connect(null, mapDispatchToProps)(InfoPage)

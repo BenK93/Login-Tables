@@ -1,21 +1,31 @@
+
 import './App.css';
 import 'antd/dist/antd.css';
-import LoginPage from './components/Pages/LoginPage';
 import InfoPage from './components/Pages/InfoPage';
-import GlobalStateProvider from "./store/GlobalStateProvider";
+import LoginPage from './components/Pages/LoginPage';
+import {connect} from 'react-redux';
 import { BrowserRouter as Router, Switch, Route} from 'react-router-dom';
 
-function App() {
+const App = (props) =>{
   return (
-    <GlobalStateProvider> 
         <Router>
           <Switch>
               <Route path="/" component={LoginPage} exact/>
+              { props.isLoggedIn ?              
               <Route path="/info" component={InfoPage} exact/>
+              : 
+              <Route path="/info" component={LoginPage} exact/>
+              }
           </Switch>            
         </Router>    
-    </GlobalStateProvider>
   );
 }
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    isLoggedIn: state.isLoggedIn
+  }
+}
+
+
+export default connect(mapStateToProps, null)(App);
